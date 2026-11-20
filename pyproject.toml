@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tennis-court-cli"
+version = "0.1.0"
+description = "通过 Android 手机上的韵动吧查询网球场馆、时间段和畅打活动"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+
+[project.scripts]
+tennis-court-cli = "tennis_court_cli.cli:entrypoint"
+
+[project.urls]
+Repository = "https://github.com/LampScript/tennis-court-cli"
+
+[tool.setuptools]
+packages = ["tennis_court_cli"]
