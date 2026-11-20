@@ -1,7 +1,7 @@
 {
   "name": "tennis-court-cli",
-  "version": "0.2.0",
-  "description": "通过 Android 手机上的韵动吧查询网球场馆、排期和畅打活动",
+  "version": "0.3.0-alpha.1",
+  "description": "直接查询韵动吧公开场馆，支持 Mac 定位",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -11,20 +11,22 @@
   "bin": {
     "tennis-court-cli": "tennis-court-cli"
   },
-  "files": [
-    "dist",
-    "tennis-court-cli"
-  ],
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build"
   },
   "dependencies": {
-    "commander": "^14.0.3",
-    "saxes": "^6.0.0"
+    "commander": "^14.0.3"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
     "typescript": "5.9"
-  }
+  },
+  "files": [
+    "dist/cli.js",
+    "dist/location.js",
+    "dist/web.js",
+    "dist/api.json",
+    "tennis-court-cli"
+  ]
 }

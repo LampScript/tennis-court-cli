@@ -1,32 +1,33 @@
 # tennis-court-cli
 
-从 Android 手机上的韵动吧查询场馆、排期和畅打活动，输出 JSON。需要 Node.js 22.12+、Android Platform Tools，以及一台已解锁、已授权 ADB 并安装韵动吧的手机。已在韵动吧 Android 版 5.3.32 验证。
+TypeScript 编写的独立终端工具，通过 HTTPS 直接查询韵动吧官网公开的场馆目录。需要 Node.js 22.12+。可在 Mac 上使用系统定位，也可以在其他系统手动传入坐标。
 
 ## 安装
 
 ```sh
-npm install -g https://github.com/LampScript/tennis-court-cli/releases/download/v0.2.0/tennis-court-cli-0.2.0.tgz
-tennis-court-cli --help
+npm install -g https://github.com/LampScript/tennis-court-cli/releases/download/v0.3.0-alpha.1/tennis-court-cli-0.3.0-alpha.1.tgz
+tennis-court-cli venues --city 上海市 --keyword 网球 --pages 2
 ```
 
-实时查询前，请确保 `adb devices` 显示手机状态为 `device`。仅查看接口清单时可以离线运行 `tennis-court-cli api describe`。
-
-## 使用
+## 定位和附近场馆
 
 ```sh
-tennis-court-cli auth status
-tennis-court-cli auth login
-tennis-court-cli venues --keyword 江湾 --pages 3
-tennis-court-cli slots "从 venues 结果复制的完整场馆名" --at 19:00
-tennis-court-cli play --pages 3
-tennis-court-cli api describe
+brew install --cask corelocationcli
+tennis-court-cli location
+tennis-court-cli nearby
 ```
 
-排期默认查询今天，可用 `--date YYYY-MM-DD` 指定场馆开放的其他日期。多台设备时在子命令前加 `--serial 设备序列号`。查询期间 CLI 会切换手机页面，请保持亮屏。城市和账号取自手机当前设置。登录需要时，在官方应用内完成验证。
+首次定位时按 macOS 系统提示授权。若无法定位，请在「系统设置 → 隐私与安全性 → 定位服务」检查权限，并打开 Wi-Fi。`location` 在终端输出经纬度及水平精度（米）。`nearby` 将坐标发给韵动吧官网，按官网返回的距离排列首页推荐场馆。范围仅覆盖首页推荐名单。
 
-`venues` 在读取的列表屏数内按名称和地址筛选；`slots` 用同一列表中的完整名称打开场馆，可用 `--pages` 扩大查找范围。排期返回界面中可识别的场地列、开始时间和显示值，默认向下读取最多六屏。可加 `--at 19:00` 只看指定开始时间。手机屏幕以外的横向场地列和未显示的日期不在结果中。`play` 读取首页畅打活动卡片，包含界面提供的时间、地点、报名状态及价格。查询不会提交订单或报名。
+也可以传入 WGS84 坐标查询指定地点，无需安装定位工具。以下为上海市中心示例坐标。
 
-`api describe` 支持离线使用，列出从安装包 Hermes 字节码确认的生产域名、业务路由、字段和鉴权方式。实际查询由官方 App 完成网络请求；本工具不保存账号密码、短信验证码或会话 token。接口清单来自客户端静态分析，不能视为服务端 HTTP 直连测试结果。
+```sh
+tennis-court-cli nearby --coords 31.2304,121.4737
+```
+
+## 预览版范围
+
+`venues` 支持城市、关键词和分页。`api describe` 可离线查看以前从 Android 客户端整理的接口信息。独立版暂未接通账户登录、实时排期及畅打活动。历史 v0.2.0 使用 ADB 驱动手机，与本版本安装包独立。
 
 ## 本地开发
 

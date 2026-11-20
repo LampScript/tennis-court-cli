@@ -1,59 +1,36 @@
-import { Command, InvalidArgumentError, Option } from 'commander';
-import { Phone } from './phone.js';
+import { Command, InvalidArgumentError } from 'commander';
+import { macLocation } from './location.js';
+import { nearby, venues } from './web.js';
 import api from './api.json' with { type: 'json' };
 
-function positive(input: string) {
-  const n = Number(input);
-  if (!/^\d+$/.test(input) || !Number.isSafeInteger(n) || n < 1) throw new InvalidArgumentError('请输入正整数');
-  return n;
-}
+const cli = new Command('tennis-court-cli').description('从终端直接查询韵动吧公开场馆，输出 JSON');
+function print(value: unknown) { console.log(JSON.stringify(value, null, 2)); }
 
-function today() {
-  const d = new Date();
-  return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
-}
+cli.command('location').description('获取 Mac 经纬度及水平精度（米）').action(() => print(macLocation()));
+cli.command('venues').description('查询官网场馆目录')
+  .option('--city <city>', '城市名', '上海市')
+  .option('--keyword <text>', '搜索关键词', '网球')
+  .option('--pages <n>', '每页 10 个场馆', value => {
+    const n = Number(value);
+    if (!/^\d+$/.test(value) || !Number.isSafeInteger(n) || n < 1) throw new InvalidArgumentError('请输入正整数');
+    return n;
+  }, 1)
+  .action(async opts => print(await venues(opts.city, opts.keyword, opts.pages)));
 
-function dateLabel(input: string) {
-  const timestamp = Date.parse(input + 'T00:00:00Z');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(input) || !Number.isFinite(timestamp) ||
-      new Date(timestamp).toISOString().slice(0, 10) !== input) throw new InvalidArgumentError('请输入有效日期 YYYY-MM-DD');
-  const days = (timestamp - Date.parse(today())) / 86400000;
-  if (days < 0 || days > 365) throw new InvalidArgumentError('日期须在未来一年内（含今天）');
-  return input.slice(5).replace('-', '/');
-}
-
-function hour(input: string) {
-  const match = /^(\d{1,2}):(\d{1,2})$/.exec(input);
-  if (!match || Number(match[1]) > 23 || Number(match[2]) > 59) throw new InvalidArgumentError('请输入有效时间 HH:MM');
-  return match.slice(1).map(s => s.padStart(2, '0')).join(':');
-}
-
-const cli = new Command('tennis-court-cli')
-  .description('通过已连接的 Android 手机查询韵动吧，输出 JSON')
-  .option('--serial <serial>', 'adb 设备序列号');
-function phone() { return new Phone(cli.opts().serial); }
-function print(data: unknown) { console.log(JSON.stringify(data, null, 2)); }
-function pages() { return new Option('--pages <n>', '读取列表屏数').argParser(positive).default(1); }
-
-cli.command('venues').description('列出当前城市的网球场馆').addOption(pages())
-  .option('--keyword <text>', '按名称或地址筛选', '')
-  .action(async opts => print(await phone().venues(opts.pages, opts.keyword)));
-
-cli.command('slots <venue>').description('查询场馆各片场地的时间格').addOption(pages())
-  .option('--date <date>', 'YYYY-MM-DD，默认今天', dateLabel)
-  .option('--at <time>', '只显示该开始时间，例如 19:00', hour)
-  .option('--scrolls <n>', '时间表最多读取屏数', positive, 6)
-  .action(async (venue, opts) => {
-    const rows = await phone().slots(venue, opts.date ?? dateLabel(today()), opts.pages, opts.scrolls);
-    print(opts.at ? rows.filter(row => row.start === opts.at) : rows);
+cli.command('nearby').description('按距离排列官网首页推荐场馆，默认使用 Mac 定位')
+  .option('--coords <lat,lon>', '使用指定的 WGS84 纬度、经度', value => {
+    const fields = value.split(',');
+    const [latitude, longitude] = fields.map(Number);
+    if (fields.length !== 2 || fields.some(f => !f.trim()) ||
+        !Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+        Math.abs(latitude) > 90 || Math.abs(longitude) > 180) throw new InvalidArgumentError('请输入有效的 纬度,经度');
+    return { latitude, longitude };
+  })
+  .action(async opts => {
+    const { latitude, longitude } = opts.coords ?? macLocation();
+    print(await nearby(latitude, longitude));
   });
-
-cli.command('play').description('查询首页畅打活动').addOption(pages())
-  .action(async opts => print(await phone().play(opts.pages)));
-const auth = cli.command('auth').description('查看手机登录状态或打开登录入口');
-auth.command('status').action(async () => print(await phone().auth(false)));
-auth.command('login').action(async () => print(await phone().auth(true)));
-cli.command('api').description('查看 APK 中确认的业务接口').command('describe').action(() => print(api));
+cli.command('api').description('查看 Android 客户端静态接口清单').command('describe').action(() => print(api));
 
 try {
   await cli.parseAsync();
