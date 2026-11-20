@@ -5,3 +5,5 @@ dist/
 build/
 .venv/
 .DS_Store
+node_modules/
+*.tgz

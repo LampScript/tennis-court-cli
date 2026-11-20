@@ -1,5 +1,2 @@
-#!/usr/bin/env python3
-from tennis_court_cli.cli import entrypoint
-
-if __name__ == "__main__":
-    entrypoint()
+#!/usr/bin/env node
+import './dist/cli.js';
