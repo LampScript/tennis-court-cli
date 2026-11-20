@@ -73,7 +73,16 @@
         "fieldList",
         "showhour"
       ],
-      "evidence": "Hermes #30123。date 是当地零点的 Unix 秒。fieldList 的 shedule 包含场地时段。"
+      "evidence": "Hermes #30123。date 是当地零点的 Unix 秒。fieldList 的 shedule 包含场地时段。",
+      "cellFields": {
+        "source": "fieldList[].shedule[]",
+        "startHour": "timePoint",
+        "status": "status",
+        "priceFields": [
+          "realPrice",
+          "expense"
+        ]
+      }
     },
     "third-party-slots": {
       "name": "第三方场馆排期",
@@ -90,7 +99,14 @@
         "booking_ground_array",
         "detail_ground_names"
       ],
-      "evidence": "Hermes #30125。selfflag=2 使用此查询。book_price_infos 包含 booking_start_time、booking_price、booking_status。"
+      "evidence": "Hermes #30125。selfflag=2 使用此查询。book_price_infos 包含 booking_start_time、booking_price、booking_status。",
+      "cellFields": {
+        "court": "detail_ground_name",
+        "courtId": "detail_ground_id",
+        "start": "booking_start_time",
+        "price": "booking_price",
+        "status": "booking_status"
+      }
     }
   },
   "play_list_example": {

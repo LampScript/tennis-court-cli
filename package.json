@@ -1,6 +1,6 @@
 {
   "name": "tennis-court-cli",
-  "version": "0.3.0-alpha.1",
+  "version": "0.3.0-alpha.2",
   "description": "直接查询韵动吧公开场馆，支持 Mac 定位",
   "license": "MIT",
   "type": "module",
@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "npm run build && node --test test/*.test.mjs"
   },
   "dependencies": {
     "commander": "^14.0.3"
@@ -27,6 +28,7 @@
     "dist/location.js",
     "dist/web.js",
     "dist/api.json",
-    "tennis-court-cli"
+    "tennis-court-cli",
+    "dist/slots.js"
   ]
 }

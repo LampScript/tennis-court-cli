@@ -1,6 +1,7 @@
 import { Command, InvalidArgumentError } from 'commander';
 import { macLocation } from './location.js';
 import { nearby, venues } from './web.js';
+import { querySlots } from './slots.js';
 import api from './api.json' with { type: 'json' };
 
 const cli = new Command('tennis-court-cli').description('从终端直接查询韵动吧公开场馆，输出 JSON');
@@ -16,6 +17,11 @@ cli.command('venues').description('查询官网场馆目录')
     return n;
   }, 1)
   .action(async opts => print(await venues(opts.city, opts.keyword, opts.pages)));
+
+cli.command('slots <venue>').description('按场馆 ID 或完整名称查询普通场馆可订时段（需要授权签名程序）')
+  .option('--city <city>', '按名称查找时使用的城市', '上海市')
+  .option('--date <date>', '上海日期 YYYY-MM-DD', new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Shanghai' }).format(new Date()))
+  .action(async (venue, opts) => print(await querySlots(venue, opts.city, opts.date)));
 
 cli.command('nearby').description('按距离排列官网首页推荐场馆，默认使用 Mac 定位')
   .option('--coords <lat,lon>', '使用指定的 WGS84 纬度、经度', value => {
